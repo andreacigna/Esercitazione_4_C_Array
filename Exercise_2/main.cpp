@@ -10,6 +10,6 @@ using namespace std;
 int main()
 {
     string nameFileI = "data.csv";
-    rateRet(nameFileI);
+    RetRate(nameFileI);
     return 0;
 }

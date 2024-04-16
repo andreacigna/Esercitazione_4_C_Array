@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void rateRet(string nameFileI)
+void RetRate(string nameFileI)
 {
     string nameFileO = "result.txt";
     ifstream fstr(nameFileI);
