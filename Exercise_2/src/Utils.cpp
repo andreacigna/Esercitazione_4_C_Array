@@ -1,98 +1,110 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
-#include <string>
 #include "Utils.hpp"
-
 
 using namespace std;
 
-void RetRate(string nameFileI)
+void retRate(string inputFile)
 {
-    string nameFileO = "result.txt";
-    ifstream fstr(nameFileI);
-    ofstream ostr(nameFileO);
+    string outputFile = "result.txt";
+    ifstream ifstr(inputFile);
+    ofstream ofstr(outputFile);
 
-    if (fstr.fail() || ostr.fail()) {
-        cout << "Errore nell'apertura file" << endl;
+    if (ifstr.fail() || ofstr.fail()) {
+        cout << "Errore apertura file" << endl;
         return;
     }
 
+    string header;
+    getline(ifstr,header);
+    double S = 0;
+    size_t pos = header.find(';');
+    istringstream converter(header);
+
+    if (pos != string::npos && pos + 1 < header.size()) {
+        string numberStr = header.substr(pos + 1); //sottostringa dopo il ';'
+        converter.str(numberStr);
+        converter >> S;}
+
+    converter.clear();
+
     string line;
-
-    getline(fstr, line);
-    stringstream valori(line);
-    string token;
-    getline(valori, token, ';');
-    string nameS = token;
-    getline(valori,token);
-    double valueS = stod(token);
-
-
-    getline(fstr, line);
-    stringstream valN(line);
-    string tokN;
-    getline(valN, tokN, ';');
-    string nameN = tokN;
-    getline(valN,tokN);
-    double n = stod(tokN);
+    getline(ifstr, line);
+    converter.str(line);
+    int n = 0;
+    pos = line.find(';'); //posizione del ; per la seconda riga
+    if (pos != string::npos && pos + 1 < line.size()) { //sottostringa dopo il ';'
+        string numberStr2 = line.substr(pos + 1);
+        converter.str(numberStr2);
+        converter >> n;}
 
 
-    vector<double> w(n);
-    vector<double> r(n);
+    double *w = new double[n];
+    double *r = new double[n];
 
-    getline(fstr, line);  // salta una linea
+    getline(ifstr, line); //salto la linea di w;r
 
-    int k = 0;
-    while (getline(fstr, line)) {
+    int riga = 0;
+    while (getline(ifstr, line)) {
         stringstream valori(line);
         string token;
 
-        getline(valori, token, ';');
-        w[k] = stod(token);
-        getline(valori, token);
-        r[k] = stod(token);
-        k+=1;
+        if (std::getline(valori, token, ';')) {
+            w[riga] = stod(token); //essendo un puntatore ad un array dinamico,
+                                   //assegno i valori con w [ ];
+        } else {
+            break; //gestisco il caso in cui non ci sia il ;
+        }
+
+        // Read the second value after ';'
+        if (std::getline(valori, token)) {
+            r[riga] = stod(token);
+        } else {
+            break;
+        }
+
+        riga += 1;
     }
 
 
-    double sumR = 0;
-    for (int i = 0; i < n;i++){
-        sumR += r[i]*w[i];
-    }
-
+    double res = 0;
     double V = 0;
     for (int i = 0; i < n;i++){
+        res += r[i]*w[i];
         V += (1+r[i])*(w[i]*1000);
     }
 
-    ostr << nameS << fixed << setprecision(2) << " = " << valueS << ", " << nameN << " = " << n << endl;
-    cout << nameS << fixed << setprecision(2) << " = " << valueS << ", " << nameN << " = " << n << endl;
-    ostr << "w = [ ";
+    ofstr << "S = " << fixed << setprecision(2) << S << ", " << "n = " << n << endl;
+    cout << "S = " << fixed << setprecision(2) << S << ", " << "n = " << n << endl;
+    ofstr << "w = [ ";
     cout << "w = [ ";
     for (int i = 0;i < n; i++){
-        ostr << w[i] << " ";
+        ofstr << w[i] << " ";
         cout << w[i] << " ";
     }
-    ostr << "]" << endl;
+    ofstr << "]" << endl;
     cout << "]" << endl;
 
-    ostr << "r = [ ";
+    ofstr << "r = [ ";
     cout << "r = [ ";
     for (int i = 0;i < n; i++){
-        ostr << r[i] << " ";
+        ofstr << r[i] << " ";
         cout << r[i] << " ";
     }
-    ostr << "]" << endl;
+    ofstr << "]" << endl;
     cout << "]" << endl;
 
-    ostr << "Rate of return of the portfolio: " << fixed << setprecision(4) << sumR << endl;
-    cout << "Rate of return of the portfolio: " << fixed << setprecision(4) << sumR << endl;
+    ofstr << "Rate of return of the portfolio: " << fixed << setprecision(4) << res << endl;
+    cout << "Rate of return of the portfolio: " << fixed << setprecision(4) << res << endl;
 
-    ostr << "V: " << fixed << setprecision(2) <<V << endl;
-    cout << "V: " << fixed << setprecision(2) <<V << endl;
+    ofstr << "V: " << fixed << setprecision(2) << V << endl;
+    cout << "V: " << fixed << setprecision(2) << V << endl;
 
-    fstr.close();
-    ostr.close();
+    ifstr.close();
+    ofstr.close();
+    delete [] w; //devo ricordarmi di deallocare la memoria
+    delete [] r;
+
+
 }
